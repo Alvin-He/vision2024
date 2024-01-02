@@ -8,6 +8,7 @@ import os
 import glob
 import sys
 import io
+import re
 
 import threading
 import time
@@ -159,6 +160,8 @@ def stero_calibrate():
 
     data = {
         "size": gray_size,
+        "left_id": k.CAM_ID_LEFT,
+        "right_id": k.CAM_ID_RIGHT,
         "stereo_maps": {
             "left": {"x": Left_Stereo_Map[0], "y": Left_Stereo_Map[1]},
             "right": {"x":Right_Stereo_Map[0], "y": Right_Stereo_Map[1]}
@@ -188,20 +191,24 @@ def tti_accept():
     command_capture = False
     amount_captured += 1
     if amount_captured == k.CALIB_TARGET_IMAGES:
-        print("Generating camera calibrate parameters...")
+        print("Generating final calibration parameters... This will take a minute...")
         data = stero_calibrate()
 
-        file = open("cam_calib_{}.json".format(time.strftime("%Y%m%d_%H_%M_%S", time.localtime())), "w+t")
-        j_data = json.JSONEncoder().encode(data)
-        print(j_data, file=file)
+        file = open("cam_calib_{}.py".format(time.strftime("%Y%m%d_%H_%M_%S", time.localtime())), "w+t")
+        np.set_printoptions(threshold=sys.maxsize)
+        print("import numpy as np\narray=np.array\n#⌄--START_DATA--⌄#\n\n", file=file)
+        # j_data = json.JSONEncoder().encode(data)
+        print("data=", file=file, end="")
+
+        str_data = str(data)
+        pattern = re.compile(r"(,\s*dtype=)(.*)(\))")
+
+        proced_str_data = pattern.sub(r"\1np.\2\3", str_data)
+        print(proced_str_data, file=file)
+        print("\n\n#^--END_DATA--^#", file=file)
         file.flush()
         file.close()
-
-        print("⌄--BEGIN RESULTS--⌄\n\n")
-        print(data)
-        print("\n\n^--END RESULTS--^")
-
-        print("Calibration result also written to:\n\t{}".format(os.path.realpath(file.name)))
+        print("Calibration result written to:\n\t{}".format(os.path.realpath(file.name)))
         print("Finished calibrating, Please make sure the values are saved. ")
         print("\n\n\n")
         h.thr_q()
@@ -214,7 +221,6 @@ def tti_reject():
     command_continue =  True
     command_capture = False
 
-    objpoints.pop()
     objpoints.pop()
     imgpoints_l.pop()
     imgpoints_r.pop()
@@ -243,7 +249,5 @@ while True:
     delta_left = (time_start + k.LIMIT_TIME_30_FPS_NS) - time.time_ns()
     
     time.sleep(h.non_negative_or_0(delta_left * (1/(1000*1000*1000))))
-
-
 
 
