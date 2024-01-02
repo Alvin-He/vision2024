@@ -1,0 +1,14 @@
+
+# cache
+**/__pycache__/
+**/.vscode/
+
+# downloads that's too big to be uploaded and builds that are system specific
+bin/
+opencv/
+opencv_python/
+.venv/
+
+## external repos
+# ben's old opencv-testing that I used for reference
+**/opencv-testing/

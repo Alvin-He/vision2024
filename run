@@ -1,0 +1,14 @@
+#! /usr/bin/bash
+
+WS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+source "$WS_DIR/bash_init.bash"
+
+target=$1
+if [[ -z $1 ]]; then 
+    target="main.py"
+elif [[ $target == "calib" ]]; then
+    target="calib.py"
+fi
+
+exec python3 "$WS_DIR/src/$target"

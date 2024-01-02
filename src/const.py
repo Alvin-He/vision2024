@@ -1,0 +1,12 @@
+
+VERSION="v0.0.0b"
+DESCRIPTION="A computer vision modules for FIRST ROBOTICS. Alvin-He 2023"
+
+CAM_ID_LEFT = 2
+CAM_ID_RIGHT = 4
+
+CHEESE_UNIT_TO_CM_f = lambda x: x * 2.3
+
+LIMIT_TIME_30_FPS_NS = (1/30) * 1000 * 1000 * 1000
+
+CALIB_TARGET_IMAGES=12
