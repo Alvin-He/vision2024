@@ -25,11 +25,15 @@ process = (
     .run_async(pipe_stdin=True)
 )
 
+cuda_img_buf = cv2.cuda.GpuMat()
 while cap.isOpened():
     ret, img = cap.read()
 
     #resize 
-    # img = cv2.cuda.resize(img,(kIMG_WIDTH, kIMG_HEIGHT),interpolation=cv2.INTER_LINEAR)
+    cuda_img_buf.upload(img)
+    cuda_img_buf = cv2.cuda.resize(cuda_img_buf, (640, 480))
+
+    img = cuda_img_buf.download()
 
     t = 'time:' + str(time.time())
     cv2.putText(img,t,(0,15), cv2.FONT_HERSHEY_SIMPLEX, 0.5,(255,0, 0),1)
