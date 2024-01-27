@@ -31,7 +31,7 @@ while cap.isOpened():
 
     #resize 
     cuda_img_buf.upload(img)
-    cuda_img_buf = cv2.cuda.resize(cuda_img_buf, (640, 480))
+    cuda_img_buf = cv2.cuda.resize(cuda_img_buf, (kIMG_WIDTH, kIMG_HEIGHT))
 
     img = cuda_img_buf.download()
 
