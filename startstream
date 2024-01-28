@@ -1,0 +1,11 @@
+#! /bin/bash
+
+source /home/frc4669/Desktop/vision/libs/bashinit
+
+echo launching mediamtx 
+cd /home/frc4669/Desktop/vision/mediamtx_v1.4.2_linux_arm64v8/
+(./mediamtx & )
+echo mediamtx launched
+
+echo launching stream.py
+python3 /home/frc4669/Desktop/vision/vision2024-modded/src/stream.py
