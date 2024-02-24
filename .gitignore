@@ -1,3 +1,15 @@
+# skip videos, images and other big assets
+*.mp4
+
+#skip tar gz, zip and other compressed files
+*.7zip
+*.gz
+*.tar
+*.tar.gz
+*.zip
+
+# skip logging
+*.log
 
 # cache
 **/__pycache__/
@@ -12,3 +24,10 @@ opencv_python/
 ## external repos
 # ben's old opencv-testing that I used for reference
 **/opencv-testing/
+
+
+ai2024/annotations/**
+ai2024/pre-trained-models/**
+src/CalibImages/**
+ai2024/mobilenet_notedetection_640x640/**
+ai2024/exported_models/**

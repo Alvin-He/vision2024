@@ -1,0 +1,6 @@
+[submodule "HsvRangeTool"]
+	path = HsvRangeTool
+	url = https://github.com/hariangr/HsvRangeTool.git
+[submodule "ai2024/models"]
+	path = ai2024/models
+	url = https://github.com/tensorflow/models.git

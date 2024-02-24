@@ -1,32 +1,28 @@
 
 
-
 import const
-import cam_calib_20231231_16_01_02 as calib
+import cam_calib_20240202_23_43_19 as calib
 import cv2
+from helpers import h
 
+left = cv2.VideoCapture(2)
+right = cv2.VideoCapture(4)
+if (not left.isOpened()) or (not right.isOpened()):
+    print("Cannot open camera")
+    exit()
 
-mtxL = calib.CAM_CALIB_DATA["Left"]["camera_matrix"]
-distL = calib.CAM_CALIB_DATA['Left']["distortion_coeff"]
-rvecsL = calib.CAM_CALIB_DATA['Left']["rotation_vectors"]
-tvecsL = calib.CAM_CALIB_DATA['Left']['translation_vectors']
+h.setCapRes640x480(left)
+h.setCapRes640x480(right)
 
-
-mtxR = calib.CAM_CALIB_DATA["Right"]["camera_matrix"]
-distR = calib.CAM_CALIB_DATA['Right']["distortion_coeff"]
-rvecsR = calib.CAM_CALIB_DATA['Right']["rotation_vectors"]
-tvecsR = calib.CAM_CALIB_DATA['Right']['translation_vectors']
-
-
-
-
-flags = 0
-flags |= cv2.CALIB_FIX_INTRINSIC
-# Here we fix the intrinsic camara matrixes so that only Rot, Trns, Emat and Fmat are calculated.
-# Hence intrinsic parameters are the same 
- 
-criteria_stereo= (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
- 
- 
-# This step is performed to transformation between the two cameras and calculate Essential and Fundamenatl matrix
-retS, new_mtxL, distL, new_mtxR, distR, Rot, Trns, Emat, Fmat = cv2.stereoCalibrate(obj_pts, img_ptsL, img_ptsR, new_mtxL, distL, new_mtxR, distR, imgL_gray.shape[::-1], criteria_stereo, flags)
+while True:
+    _, imgL = left.read()
+    _, imgR = right.read()
+    cv2.imshow("Left image before rectification", imgL)
+    cv2.imshow("Right image before rectification", imgR)
+    
+    Left_nice= cv2.remap(imgL,calib.data['stereo_maps']['left']['x'], calib.data['stereo_maps']['left']['y'], cv2.INTER_LANCZOS4, cv2.BORDER_CONSTANT, 0)
+    Right_nice= cv2.remap(imgR,calib.data['stereo_maps']['right']['x'], calib.data['stereo_maps']['right']['y'],cv2.INTER_LANCZOS4, cv2.BORDER_CONSTANT, 0)
+    
+    cv2.imshow("Left image after rectification", Left_nice)
+    cv2.imshow("Right image after rectification", Right_nice)
+    cv2.waitKey(30)
