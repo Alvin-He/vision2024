@@ -10,6 +10,8 @@ WEIRD_USB_CAMERA = {
 }
 
 MAIN_45FOV = {
+  # "camToRobotPos": [800,250,300, 0], # anchored at bottom right of robot
+  "camToRobotPos": [0,0,0, 0],
   "matrix":
     [[673.49634849, 0, 616.93113106],
     [0, 670.71012973, 536.45109056],

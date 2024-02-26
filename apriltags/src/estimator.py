@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 import helpers
+import const as k
 
 lineThingPoints = np.float32([
   (0, 0, 0), # origin
@@ -15,7 +16,9 @@ class EstimationResult:
   def __init__(self, tag_id, rvecs, tvecs) -> None:
     self.id = tag_id
     self.rvecs = rvecs
-    self.tvecs = tvecs
+    self.tvecs = tvecs 
+    
+    self.tvecs = self.tvecs *  (k.APRILTAG_BLOCK_SIZE_mm / 10)
 
 class Estimator:
   def __init__(self, camera):
@@ -42,7 +45,7 @@ class Estimator:
     corners, ids, rejected = self.detector.detectMarkers(image)
     for i in range(len(corners)):
       corner = corners[i]
-      id = ids[i]
+      id = ids[i][0] # index zero is needed cuz it returns a numpy array
 
       ret, rvec, tvec = cv.solvePnP(self.objectPoints, corner, self.matrix, self.distCoeffs)
       rmat = cv.Rodrigues(rvec)[0]
@@ -62,8 +65,9 @@ class Estimator:
 
       
       # out.append((np.ravel(rvec), np.ravel(pmat.reshape(1, 3))))
-      out.append(EstimationResult(id, np.ravel(rvec), np.ravel(pmat.reshape(1, 3))))
-      print(np.rad2deg(helpers.rodRotMatToEuler(cv.Rodrigues(rvec)[0])))
+      # out.append(EstimationResult(id, np.ravel(rvec), np.ravel(pmat.reshape(1, 3))))
+      out.append(EstimationResult(id, np.rad2deg(helpers.rodRotMatToEuler(cv.Rodrigues(rvec)[0])), np.ravel(pmat.reshape(1, 3))))
+      # print(np.rad2deg(helpers.rodRotMatToEuler(cv.Rodrigues(rvec)[0])))
       
     
     image_old = helpers.image_resize(image_old, 1080, 920)

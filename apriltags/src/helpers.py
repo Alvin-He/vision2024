@@ -37,9 +37,19 @@ def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
     # return the resized image
     return resized
 
+# rotate point 
+def rotatePoint(x, y, theta):
+    cords = np.array([x,y])
+    r1 = np.sqrt(np.sum(np.power(cords, 2)))
+    xp1 = r1*np.cos(np.arctan(cords[1]/cords[0]) + theta)
+    yp1 = r1*np.sin(np.arctan(cords[1]/cords[0]) + theta)
+
+    return np.array([xp1, yp1])
+
 # implenmentaion of Rodugriz Rotation matrix to Euler angles based on
 # https://d3cw3dd2w32x2b.cloudfront.net/wp-content/uploads/2012/07/euler-angles1.pdf
 # or /docs/euler-angles
+# (x,y,z)
 def rodRotMatToEuler(m):
     x = np.arctan2(m[1][2], m[2][2], dtype=np.double)
     c_2 = np.sqrt(m[0][0]**2 + m[0][1]**2, dtype=np.double)
