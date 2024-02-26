@@ -58,3 +58,26 @@ def rodRotMatToEuler(m):
     c_1 = np.cos(x, dtype=np.double)
     z = np.arctan2(s_1*m[2][0] - c_1 * m[1][0], c_1*m[1][1] - s_1*m[2][1], dtype=np.double)
     return (x, y, z)
+
+# normalize angle between 0 and 360
+def normAngle(angle):
+    return angle % 360
+
+# group cordinates based on distance, computionaly expensive
+def groupCords(cords: list[list[np.double, np.double]]):
+
+
+    all_distances = []
+    for i in range(len(cords)):
+        distances = []
+
+        current = cords[i]
+
+        for j in range(i, len(cords)):
+            c = cords[j]
+            dist = np.sqrt((c[0] - current[0])**2 + (c[1] - current[1])**2)
+            distances.append(dist)
+        
+        all_distances.append(distances)
+        
+            # TODO: FINISH THIS

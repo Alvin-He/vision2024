@@ -1,6 +1,7 @@
 from estimator import EstimationResult
 import numpy as np
 import time 
+import helpers
 
 #https://stackoverflow.com/a/45399188 #1.2 works pretty well to kick out more than ~5 cm of difference
 def reject_outliers_2(data, m=1.2):
@@ -23,11 +24,21 @@ class RobotPos:
         self.y = y
         self.theta = theta
         
-def camAsbRotToLocDirections(roboCurRot, cameraInitRot):
-    # direction vectors
-    x = 1
-    y = 1
+# c1: camera axis1, c2: camera acis2, cInitRot: camera initial rotation, tx: tag world axis1, ty: tag world axis2, rRot: robot current rotation
+# The order of axis (x or y) doesn't matter
+# NOTE: THIS DOES NOT OUTPUT A DETERMINISTIC COORDINDATE, NEED TO HAVE ANOTHER CAMERA TO LOOK AT IT BE SURE
+def camRelativeToAbsoulote(c1, c2, cInitRot, t1, t2, rRot) -> list[np.double, np.double]:
+    theta = np.array(cInitRot + rRot, dtype=np.double) # force datatype
 
+    # see discrod pin message for math
+    b = (t1*np.cos(theta) - t2*np.sin(theta))
+    r_1 = b + np.sqrt(b**2 + c1**2 + c2**2 - t1**2 - t2**2)
+    r_2 = b - np.sqrt(b**2 + c1**2 + c2**2 - t1**2 - t2**2)
+    
+    cord1 = [r_1 * np.cos(theta), r_1 * np.sin(theta)]
+    cord2 = [r_2 * np.cos(theta), r_2 * np.sin(theta)]
+
+    return [cord1, cord2]
     
 
 
@@ -70,13 +81,12 @@ class RobotPositionTracker:
         self.lastTrustWorthyUpdateFrameTimeNs = 0
 
     def update(self, camera, results: list[EstimationResult]):
-        all_x = []
-        all_y = []
+        if len(results) < 1: return
+        cameraTrans = camera["camToRobotPos"]
+
+        all_cords_possible = []
         all_yaw = []
         # all_z = []
-
-        if len(results) < 1: return
-
         # convert camera relative cords into world cords
         for i in results:
             if i.id > APRILTAG_MAX_ID_EXIST: 
@@ -88,19 +98,19 @@ class RobotPositionTracker:
             tag_yaw = WORLD_TAG_LOCATIONS[str(i.id)][3]
 
             # camera axis mapping
-            all_x.append(tag_x + i.tvecs[2]) # front mounted cam 
-            all_y.append(tag_y + i.tvecs[0]) 
-            raw_yaw = -i.rvecs[1] + 180 - tag_yaw
-            all_yaw.append(raw_yaw % 360) # normalize between 0 and 360
+            yaw = helpers.normAngle(-i.rvecs[1] + 180 - tag_yaw)
+            all_yaw.append(yaw)
+            cords = camRelativeToAbsoulote(i.tvecs[0], i.tvecs[2], cameraTrans[3], tag_x, tag_y, yaw)
+            all_cords_possible.extend(cords)
             # all_z.append(i.tvecs[0])
 
-        #normalize data and kick out outliars due to detection incorrections
-        x = np.average(reject_outliers_2(np.array(all_x)))
-        y = np.average(reject_outliers_2(np.array(all_y)))
+        # normalize data and kick out outliars due to detection incorrections
         yaw = np.average(reject_outliers_2(np.array(all_yaw)))
 
+        # conclude all the cords into 2, hopefully 1 set of cords
+
+
         # apply camera transformations
-        cameraTrans = camera["camToRobotPos"]
         x += cameraTrans[0]
         y += cameraTrans[1]
         # don'y worry about z
