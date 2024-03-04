@@ -1,6 +1,8 @@
 import cv2
 import math
 import numpy as np
+import os
+DEBUG = True #os.environ["DEBUG"]
 
 # https://stackoverflow.com/a/44659589 with GPU  cuda resize
 def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
@@ -64,20 +66,67 @@ def normAngle(angle):
     return angle % 360
 
 # group cordinates based on distance, computionaly expensive
-def groupCords(cords: list[list[np.double, np.double]]):
+# limit radius = 10 CM
+def groupCords(cords: list[np.ndarray[np.double, np.double]], limitRadiCM = 10):
 
+    groups = [] # array of shape (1,2<groupCord, numCordInGroup>)
 
-    all_distances = []
-    for i in range(len(cords)):
-        distances = []
-
+    groups.append([cords[0], 1]) # initialize with first cordinate 
+    for i in range(1, len(cords)):
         current = cords[i]
-
-        for j in range(i, len(cords)):
-            c = cords[j]
-            dist = np.sqrt((c[0] - current[0])**2 + (c[1] - current[1])**2)
+        # calculate current cord to all known groups
+        distances = []
+        for j in range(len(groups)):
+            g = groups[j][0]
+            dist = np.sqrt((g[0] - current[0])**2 + (g[1] - current[1])**2)
             distances.append(dist)
         
-        all_distances.append(distances)
+
+        # iterate throught the distances and assign cordinate to group or make a new group
+        groupToJoin = None
+        is_ignored = False
+        for di in range(len(distances)):
+            d = distances[di]
+            if d > limitRadiCM: continue
+            if groupToJoin != None:  # ambigious case where the point is between 2 groups, skip
+                is_ignored = True
+                break
+            groupToJoin = di # the distance array should have the same size as groups
+
+        if is_ignored: continue
+        if groupToJoin == None:
+            groups.append([current, 1])    
+            continue
+        g = groups[groupToJoin]
+        g[0] = (g[0] + current)/2 # average the previus ave cord with the new cord
+        g[1] += 1 # increase counter
+
+    best_res = [] # a list of best cordinates # from the groups
+    last_best_score = 0
+    for g in groups:
+        if g[1] > last_best_score:
+            best_res = [g[0]]
+            last_best_score = g[1]
+        elif g[1] == last_best_score:
+            best_res.append(g[0])
+        # otherwise skip
+    
+    return best_res
+
+            
+
+
+    # all_distances = []
+    # for i in range(len(cords)):
+    #     distances = []
+
+    #     current = cords[i]
+
+    #     for j in range(i, len(cords)):
+    #         c = cords[j]
+    #         dist = np.sqrt((c[0] - current[0])**2 + (c[1] - current[1])**2)
+    #         distances.append(dist)
         
-            # TODO: FINISH THIS
+    #     all_distances.append(distances)
+        
+    
