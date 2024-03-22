@@ -38,7 +38,8 @@ prev_img_shape = None
 left = cv2.VideoCapture(k.CAM_ID_LEFT)
 right = cv2.VideoCapture(k.CAM_ID_RIGHT) 
 
-# cam = cv2.VideoCapture(int(input("Enter cam id for calib <int>:\n")))
+h.setCapRes640x480(right)
+h.setCapRes640x480(left)
 
 cv2.namedWindow('left')
 cv2.namedWindow('right')

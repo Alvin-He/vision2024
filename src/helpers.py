@@ -1,7 +1,7 @@
 import sys
 import const as k
 import _thread
-
+import cv2
 
 class namespace_global:
 
@@ -14,6 +14,12 @@ class namespace_global:
     def non_negative_or_0(num: float):
         if num < 0: num = 0
         return num
+    
+    @staticmethod
+    def setCapRes640x480(cap):
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+
 h = namespace_global
 
 

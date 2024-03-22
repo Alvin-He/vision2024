@@ -9,6 +9,8 @@ if [[ -z $1 ]]; then
     target="main.py"
 elif [[ $target == "calib" ]]; then
     target="calib.py"
+elif [[ $target == "test" ]]; then
+    target="test.py"
 fi
 
 exec python3 "$WS_DIR/src/$target"
