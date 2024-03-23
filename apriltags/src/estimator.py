@@ -3,7 +3,7 @@ import numpy as np
 import helpers
 import const as k
 import os
-DEBUG = True #os.environ["DEBUG"]
+# DEBUG = True #os.environ["DEBUG"]
 # import multiprocessing
 
 lineThingPoints = np.float32([
@@ -39,12 +39,13 @@ class Estimator:
       [-4, -4, 0]
     ], dtype = "double")
 
-    self.detector = cv.aruco.ArucoDetector(
-      dictionary = cv.aruco.getPredefinedDictionary(cv.aruco.DICT_APRILTAG_36h11),
-      detectorParams = cv.aruco.DetectorParameters()
-    )
+    self.dictionary = cv.aruco.getPredefinedDictionary(cv.aruco.DICT_APRILTAG_36h11)
+    # self.detector = cv.aruco.ArucoDetector(
+    #   dictionary = cv.aruco.getPredefinedDictionary(cv.aruco.DICT_APRILTAG_36h11),
+    #   detectorParams = cv.aruco.DetectorParameters()
+    # )
 
-  def estimate(self) -> list[EstimationResult]:
+  def estimate(self) -> "list[EstimationResult]":
     out = []
 
     ret, image = self.cap.read()
@@ -52,7 +53,8 @@ class Estimator:
     
     image_old = image.copy()
     image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-    corners, ids, rejected = self.detector.detectMarkers(image)
+    # corners, ids, rejected = self.detector.detectMarkers(image)
+    corners, ids, rejected = cv.aruco.detectMarkers(image, self.dictionary)	
     for i in range(len(corners)):
       corner = corners[i]
       id = ids[i][0] # index zero is needed cuz it returns a numpy array
@@ -81,7 +83,7 @@ class Estimator:
       # out.append(EstimationResult(self.camera, id, theta, fTvec))
 
       
-      if not DEBUG: continue
+      if not k.DEBUG: continue
       computedImagePoints, j = cv.projectPoints(self.objectPoints, rvec, tvec, self.matrix, self.distCoeffs)
       for [[x, y]] in computedImagePoints: cv.circle(image_old, (int(x), int(y)), 5, (0, 255, 0), -1)
 
@@ -93,7 +95,7 @@ class Estimator:
       cv.putText(image_old, "Rot: " + str(np.around(rvec * (180 / np.pi), 3)), (10, image.shape[0] - 40), cv.FONT_HERSHEY_PLAIN, 1, (0,255,0), 2)
       cv.putText(image_old, "Trans: "+ str(np.around(tvec, 3)), (10, image.shape[0] - 10), cv.FONT_HERSHEY_PLAIN, 1, (0,255,0), 2)
 
-    if DEBUG: 
+    if k.DEBUG: 
       image_old = helpers.image_resize(image_old, 1080, 920)
       cv.imshow("img", image_old)
     return out

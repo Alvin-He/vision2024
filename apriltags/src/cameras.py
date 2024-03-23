@@ -1,10 +1,10 @@
-from typing import TypedDict
+from typing import Dict
 
-class _camera(TypedDict):
+class _camera(Dict):
   id: str
   apriltags: bool = False
-  matrix: list[list, list, list]
-  distCoeffs: list[list]
+  matrix: "list[list, list, list]"
+  distCoeffs: "list[list]"
 
 
 WEIRD_USB_CAMERA: _camera = {

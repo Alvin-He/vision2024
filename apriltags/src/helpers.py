@@ -2,7 +2,8 @@ import cv2
 import math
 import numpy as np
 import os
-DEBUG = True #os.environ["DEBUG"]
+import const as k
+# DEBUG = True #os.environ["DEBUG"]
 
 # https://stackoverflow.com/a/44659589 with GPU  cuda resize
 def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
@@ -67,7 +68,7 @@ def normAngle(angle):
 
 # group cordinates based on distance, computionaly expensive
 # limit radius = 10 CM
-def groupCords(cords: list[np.ndarray[np.double, np.double]], limitRadiCM = 10):
+def groupCords(cords: "list[np.ndarray[np.double, np.double]]", limitRadiCM = 10):
 
     groups = [] # array of shape (1,2<groupCord, numCordInGroup>)
 

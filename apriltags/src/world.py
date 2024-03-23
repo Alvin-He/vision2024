@@ -4,7 +4,8 @@ import time
 import helpers
 import cv2 as cv
 import os
-DEBUG = True #os.environ["DEBUG"]
+import const as k
+# DEBUG = True #os.environ["DEBUG"]
 
 #https://stackoverflow.com/a/45399188 #1.2 works pretty well to kick out more than ~5 cm of difference
 def reject_outliers_2(data, m=1.2):
@@ -27,7 +28,7 @@ class RobotPos:
         self.y = y
         self.theta = theta
         
-def camRelativeToAbsoulote(cx, cy, tx, ty, tRot) -> np.ndarray[np.double, np.double]:
+def camRelativeToAbsoulote(cx, cy, tx, ty, tRot) -> "np.ndarray[np.double, np.double]":
     cx = np.double(cx)
     cy = np.double(cy)
     tx = np.double(tx)
@@ -69,7 +70,7 @@ WORLD_TAG_LOCATIONS = { # x,y,z,yaw
 ROBOT_SIZE_cm = (800, 500, 600)
 
 def drawMiniMap(cords):
-  if not DEBUG: return
+  if not k.DEBUG: return
   screen = np.zeros([500, 500, 3], dtype=np.uint8)
 
   # tag
@@ -92,7 +93,7 @@ class RobotPositionTracker:
         self.visionBestLocation = RobotPos(0, 0, 0)
         self.lastTrustWorthyUpdateFrameTimeNs = 0
 
-    def update(self, results: list[EstimationResult]):
+    def update(self, results: "list[EstimationResult]"):
         if len(results) < 1: return
 
         all_cords_possible = []
@@ -135,7 +136,7 @@ class RobotPositionTracker:
 
         drawMiniMap(best_cords)
 
-        curTimeNs = time.time_ns()
+        # curTimeNs = time.time_ns()
         # if (cm_to_m(abs(x - self.visionBestLocation.x))/ns_to_sec(curTimeNs - self.lastTrustWorthyUpdateFrameTimeNs) > SINGLE_SPEED_LIMIT_MPS or
         #   cm_to_m(abs(y - self.visionBestLocation.y))/ns_to_sec(curTimeNs - self.lastTrustWorthyUpdateFrameTimeNs)):
         #     print("Exceed speed limit, loc update at time: {} will not be considered".format(curTimeNs))
@@ -159,7 +160,7 @@ class RobotPositionTracker:
             final_loc = best_cords[idx]
             
         self.visionBestLocation = RobotPos(final_loc[0], final_loc[1], yaw) 
-        self.lastTrustWorthyUpdateFrameTimeNs = curTimeNs
+        # self.lastTrustWorthyUpdateFrameTimeNs = curTimeNs
 
     def getPos(self):
         return self.visionBestLocation

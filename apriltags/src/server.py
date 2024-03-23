@@ -8,17 +8,17 @@ import cv2 as cv
 import numpy as np
 import importlib
 import os
-DEBUG = True
+# DEBUG = True
 from estimator import Estimator
 from estimator import EstimationResult
 # import cameras
-
+import json
 import world
 
 import const as k
 import helpers
 
-def updateNetworkTag(tagTable: ntab.NetworkTable, results: list[EstimationResult]):
+def updateNetworkTag(tagTable: ntab.NetworkTable, results: "list[EstimationResult]"):
   for res in results: 
     table = tagTable.getSubTable(str(res.id))
     rot = table.getSubTable("Rot")
@@ -33,6 +33,7 @@ def updateNetworkTag(tagTable: ntab.NetworkTable, results: list[EstimationResult
     trans.putNumber("Z", res.tvecs[2])
 
 def updateNetworkRobotPos(poseTable: ntab.NetworkTable, pos: world.RobotPos):
+  print(pos.x, pos.y, pos.theta)
   poseTable.putNumber("X", pos.x)
   poseTable.putNumber("Y", pos.y)
   poseTable.putNumber("R", pos.theta)
@@ -42,20 +43,20 @@ parser = ArgumentParser(
   add_help = True
 )
 
-# parser.add_argument("-s", "--server")
+parser.add_argument("-s", "--server")
 # parser.add_argument("-c", "--cameras", action="store", default="./cameras.py")
-# parser.add_argument("-d", "--debug", action="store_false")
-# parser.add_argument("--nt3", action = "store_true")
-# args = parser.parse_args()
+parser.add_argument("-d", "--debug", action="store_false")
+parser.add_argument("--nt3", action = "store_true")
+args = parser.parse_args()
 
 import cameras
 # os.environ["DEBUG"] = str(args.debug)
 # DEBUG = os.environ["DEBUG"]
 
-# NetworkTables.initialize(server = args.server)
-# mainTable = NetworkTables.getTable("SmartDashboard/VisionServer")
-# tagTable = mainTable.getSubTable("Tags")
-# poseTable = mainTable.getSubTable("Pose")
+NetworkTables.initialize(server = args.server)
+mainTable = NetworkTables.getTable("SmartDashboard/VisionServer")
+tagTable = mainTable.getSubTable("Tags")
+poseTable = mainTable.getSubTable("Pose")
 
 poseEstimator = Estimator(cameras.MAIN_45FOV)
 
@@ -69,7 +70,7 @@ frontCord = np.abs(100 - np.array([150, 100]))
 pt1Cord = np.abs(100 - np.array([150, 100]))
 # pt2Norm = 100 + roboSize/2
 def drawRobot(rot):
-  if not DEBUG: return
+  if not k.DEBUG: return
   rot = -rot
   theta = np.deg2rad(rot)
   screen = np.zeros([200,200,3], dtype=np.uint8)
@@ -100,7 +101,7 @@ while True:
   tagPoses = poseEstimator.estimate()
   robot.update(tagPoses)
   robot_pos = robot.getPos()
-  # updateNetworkRobotPos(tagTable, robot_pos)
+  updateNetworkRobotPos(tagTable, robot_pos)
   
   drawRobot(robot_pos.theta)
 
